@@ -9,20 +9,45 @@ It runs headless Unity sandboxes (batchmode, no GUI/VNC) for autonomous C# editi
 Separate from DreamCI — zero shared state, independent Docker Compose stack.
 
 ## Architecture
-- **OpenHands** app container on port :3000
+- **OpenHands** (forked, local build) app container on port :3000
 - **PostgreSQL** container on port :5433 (DreamForge-only, isolated)
 - **Unity Sandbox** containers: headless GameCI images with batchmode Unity
 - **Docker Compose** orchestrates everything
 - No Caddy, no reverse proxy — direct port access
 
+## OpenHands Fork
+The `openhands/` directory is a full fork of [All-Hands-AI/OpenHands](https://github.com/All-Hands-AI/OpenHands).
+Built locally via `docker compose build openhands`.
+
+### Key directories for customization:
+- `openhands/frontend/src/` — React UI (TypeScript)
+- `openhands/openhands/` — Python backend
+- `openhands/openhands/runtime/` — Sandbox runtime logic
+- `openhands/openhands/microagent/` — Microagent loading
+- `openhands/containers/app/Dockerfile` — App image build
+
+### Syncing with upstream:
+```bash
+cd openhands
+git remote add upstream https://github.com/All-Hands-AI/OpenHands.git
+git fetch upstream
+git merge upstream/main  # resolve conflicts manually
+```
+
 ## Project Structure
 ```
 docker-compose.yml          → OpenHands + PostgreSQL orchestration
 Dockerfile.unity-sandbox    → Custom headless Unity image (GameCI base)
+openhands/                  → OpenHands fork (full source, local build)
+  frontend/src/             → React UI (customizable)
+  openhands/                → Python backend (API, runtime, agents)
+  containers/app/           → App Dockerfile
+  containers/runtime/       → Sandbox runtime
 scripts/
-  unity-init.sh             → Bootstrap Unity headless (license, clone, init)
-  unity-compile.sh          → Batchmode compilation helper
-  compile-watcher.sh        → Monitor Editor.log, write status JSON
+  unity/
+    unity-init.sh           → Bootstrap Unity headless (license, clone, init)
+    unity-compile.sh        → Batchmode compilation helper
+    compile-watcher.sh      → Monitor Editor.log, write status JSON
   deploy.sh                 → Deploy helper for Hetzner server
 microagents/
   repo.md                   → Agent instructions for Unity headless work

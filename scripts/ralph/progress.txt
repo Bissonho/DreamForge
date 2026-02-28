@@ -1,3 +1,123 @@
+## Codebase Patterns
+- Shell scripts go in scripts/unity/ for sandbox scripts, scripts/ for project-level scripts
+- All shell scripts must start with #!/bin/bash and set -euo pipefail
+- Docker image: unityci/editor:ubuntu-${UNITY_VERSION}-${UNITY_PLATFORM}-${GAMECI_VERSION} pattern
+- ARGs must be declared BEFORE FROM to be usable in FROM
+- No GUI packages — xvfb, vnc, fluxbox, xdotool are BANNED
+- PostgreSQL for DreamForge must use port 5433 (not 5432)
+- All env vars in docker-compose: ${VAR:-default} syntax
+- Scripts copied to / root in Dockerfile: /unity-init.sh, /compile-watcher.sh, /unity-compile.sh
+
 # Ralph Progress Log
 Started: 2026-02-28
+---
+
+## 2026-02-28 - US-001
+- Implemented Dockerfile.unity-sandbox with GameCI base image, headless deps, Node.js 22 LTS, TOS pre-accept
+- Created placeholder scripts in scripts/unity/: unity-init.sh, compile-watcher.sh, unity-compile.sh
+- All bash -n syntax checks pass
+- Dockerfile structure validated (FROM, RUN, COPY, ARG, LABEL, WORKDIR all correct)
+- **Learnings for future iterations:**
+  - ARG before FROM is required for variables used in FROM instruction
+  - unity-init.sh looks for compile-watcher at /unity-compile-watcher.sh OR /compile-watcher.sh (both checked)
+  - inotifywait from inotify-tools is used in compile-watcher for file monitoring
+  - TOS pre-accept: /root/.config/unity3d/Unity/TOS.json with {"v":1,"accepted":true}
+---
+
+## 2026-02-28 - US-002
+- Verified scripts/unity/unity-init.sh meets all acceptance criteria (was fully implemented in US-001)
+- All criteria satisfied: git clone with GIT_REPO_URL/GIT_BRANCH, license via .ulf + UNITY_SERIAL, batchmode init, compile-watcher background start, no GUI packages, informative echo messages
+- bash -n scripts/unity/unity-init.sh passes
+- **Learnings for future iterations:**
+  - US-001 agent created fully-implemented scripts, not just placeholders — US-002/003/004 are verification+marking stories
+  - License activation order: .ulf file path first, then UNITY_SERIAL (with UNITY_EMAIL + UNITY_PASSWORD), then TOS-only fallback
+  - Compile-watcher looked up at both /unity-compile-watcher.sh and /compile-watcher.sh for resilience
+---
+
+## 2026-02-28 - US-003
+- Verified scripts/unity/compile-watcher.sh meets all acceptance criteria (was fully implemented in US-001)
+- All criteria satisfied: inotifywait-based monitoring, JSON status file, idle/compiling/success/errors states, ISO8601 timestamp, error CS extraction, infinite daemon loop, resilient to missing log file
+- bash -n scripts/unity/compile-watcher.sh passes
+- **Learnings for future iterations:**
+  - US-001 created fully-implemented compile-watcher.sh — US-003 is a verification story
+  - compile-watcher checks both /root/.config/unity3d/Editor.log and /workspace/Library/Logs/Editor.log
+  - extract_errors uses grep -o 'error CS[^)]*' to capture error codes and messages
+  - inotifywait -q -e modify is used (quiet mode, modify events only)
+  - Script is resilient: if inotifywait fails or log file disappears, it sleeps 2s and retries
+---
+
+## 2026-02-28 - US-004
+- Verified scripts/unity/unity-compile.sh meets all acceptance criteria (was fully implemented in US-001)
+- All criteria satisfied: unity-editor batchmode command with correct flags, waits for compilation, outputs status JSON, returns 0 on success/idle, returns 1 on failure, proper shebang and error handling
+- bash -n scripts/unity/unity-compile.sh passes
+- **Learnings for future iterations:**
+  - US-001 created fully-implemented unity-compile.sh — US-004 is a verification story
+  - Script uses grep -o '"status":"[^"]*"' | cut -d'"' -f4 to extract status value from JSON
+  - Treats both "success" and "idle" as successful compilations (handles edge cases)
+  - Waits 1s after unity-editor exits for compile-watcher to write status file
+  - Falls back gracefully if status file missing (exit 1, informative warning)
+---
+
+## 2026-02-28 - US-005
+- Created docker-compose.yml with OpenHands + PostgreSQL orchestration
+- All acceptance criteria satisfied: correct image URIs, port 3000 for OpenHands, port 5433 for PostgreSQL (127.0.0.1 only), all required env vars with ${VAR:-default} syntax, resource limits, volumes, healthcheck, depends_on with service_healthy condition
+- docker compose config --quiet passes successfully
+- **Learnings for future iterations:**
+  - PostgreSQL 16-alpine healthcheck uses pg_isready command
+  - OpenHands deploy limits use memory: 4g under deploy.resources.limits
+  - Workspace volume flexible: uses ${WORKSPACE_VOLUME:-./workspace} for host path, ${WORKSPACE_MOUNT_PATH:-/workspace} for container path
+  - extra_hosts: host.docker.internal:host-gateway enables container-to-host communication (useful for debugging)
+  - Named volumes for persistence: openhands-state (app data), dreamforge-pgdata (postgres data)
+  - Sandbox container limits (MEMORY, CPUS) passed as env vars, not Docker deploy limits
+---
+
+## 2026-02-28 - US-006
+- Created microagents/repo.md with comprehensive agent instructions for headless Unity development
+- All acceptance criteria satisfied: headless mode explained, bootstrap step documented, edit-compile-verify cycle detailed, status JSON states documented, project rules listed, Debug.Log() mentioned, verification workflow emphasized, no GUI emphasized, markdown well-structured with sections, tables, examples
+- File includes: Overview, Quick Start, Status JSON Reference, Rules and Constraints, Logging, Verification Workflow, Project Structure, Troubleshooting, Summary
+- **Learnings for future iterations:**
+  - Agent instruction files should use numbered/sequential workflows for clarity
+  - Tables (markdown) work well for reference material (status states, rules)
+  - Code examples with ```bash``` and ```csharp``` blocks improve readability
+  - Explicit "What You CAN/MUST NOT Do" sections prevent common mistakes
+  - Troubleshooting section helps agents self-diagnose issues
+---
+
+## 2026-02-28 - US-007
+- Created microagents/knowledge/unity-compilation.md with error diagnosis and fixes
+- All acceptance criteria satisfied: trigger keywords defined, all four error codes (CS0246, CS1061, CS0103, CS0234) documented with causes/fixes/examples, status JSON reading explained, general debugging approach provided, markdown well-structured
+- File includes: Triggers, Overview, Common Error Codes (4 detailed), Status JSON Reading, General Debugging Approach, Fix and Verify Cycle, Tips
+- **Learnings for future iterations:**
+  - Knowledge files use "# Triggers" format for OpenHands context activation
+  - Error documentation should include: cause, fixes (numbered), and code examples (correct vs incorrect)
+  - Common mistake tables help agents quickly identify patterns
+  - Status JSON explanation with example JSON block is essential
+  - Cyclic approach (fix → compile → verify) emphasizes iterative workflow
+---
+
+## 2026-02-28 - US-008
+- Created microagents/knowledge/unity-editor.md with project structure and CLI commands
+- All acceptance criteria satisfied: trigger keywords defined, project directory structure explained with tree diagram, safe/read-only directories documented in table, batchmode CLI commands with examples (execute, build target, tests), test workflow documented, .meta files explained with examples, markdown well-structured
+- File includes: Triggers, Overview, Project Directory Structure, Meta Files, Batchmode CLI Commands, Useful Patterns, Important Constraints, Common Workflows, Troubleshooting, Summary
+- **Learnings for future iterations:**
+  - Directory trees (```tree``` format) help agents understand structure quickly
+  - Tables (Safe vs Read-Only) provide quick reference
+  - CLI commands should have full flag examples (not abbreviated)
+  - Code examples for both C# (Editor scripts, tests) and CLI usage
+  - Constraints section explicitly lists what's unavailable in headless mode vs what works
+  - Common workflows show practical patterns for scene setup, resource loading, scene management
+---
+
+## 2026-02-28 - US-009
+- Created scripts/deploy.sh with 4-step deployment automation (sync, build, compose, summary)
+- All acceptance criteria satisfied: correct shebang and set -euo pipefail, SERVER positional arg required with usage message, SSH PORT optional arg with default 22, rsync with exclusions (.git, .env, license.ulf, .claude, node_modules, .venv), docker build for Dockerfile.unity-sandbox on server, docker compose up -d on server, final message with URL http://SERVER:3000, echo progress at each step, bash -n passes
+- Script uses here-documents (<<<'EOF') for multi-line SSH commands
+- **Learnings for future iterations:**
+  - Deployment scripts should be idempotent where possible (rsync --delete, compose up -d idempotent)
+  - Each step should have clear progress messages with [deploy] prefix
+  - Usage message templates help users understand argument format
+  - Here-documents keep SSH commands readable and organized
+  - Final summary box (with ━━ borders) provides clear feedback
+  - Exclude patterns should include .claude, node_modules, .venv for safety
+  - Exit code handling (exit 1 on error) enables proper pipeline error detection
 ---

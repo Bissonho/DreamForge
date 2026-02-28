@@ -4,7 +4,7 @@ Unity AI development environment powered by OpenHands. Headless Unity sandboxes 
 
 ## Architecture
 
-- **OpenHands** — Open source AI agent platform (MIT)
+- **OpenHands** — Forked from [All-Hands-AI/OpenHands](https://github.com/All-Hands-AI/OpenHands) (MIT), built locally
 - **Unity Headless** — Batchmode compilation, no GUI/VNC
 - **Docker Compose** — Isolated deployment, zero shared state with DreamCI
 
@@ -23,7 +23,8 @@ docker build --build-arg UNITY_VERSION=6000.0.36f1 \
     -t dreamforge-unity:6000.0.36f1 \
     -f Dockerfile.unity-sandbox .
 
-# 4. Start services
+# 4. Build OpenHands (local fork) + start services
+docker compose build openhands
 docker compose up -d
 
 # 5. Access OpenHands
@@ -42,12 +43,17 @@ open http://localhost:3000
 ## Project Structure
 
 ```
-docker-compose.yml          # OpenHands + PostgreSQL
+docker-compose.yml          # OpenHands + PostgreSQL orchestration
 Dockerfile.unity-sandbox    # Headless Unity image (GameCI base)
+openhands/                  # OpenHands fork (full source)
+  frontend/src/             # React UI (customizable)
+  openhands/                # Python backend
+  containers/app/           # App Dockerfile
 scripts/
-  unity-init.sh             # Bootstrap Unity headless
-  unity-compile.sh          # Batchmode compilation helper
-  compile-watcher.sh        # Monitor compilation status
+  unity/
+    unity-init.sh           # Bootstrap Unity headless
+    unity-compile.sh        # Batchmode compilation helper
+    compile-watcher.sh      # Monitor compilation status
   deploy.sh                 # Deploy to server
 microagents/
   repo.md                   # Agent instructions for Unity headless

@@ -19,7 +19,7 @@
         "Dockerfile syntax is valid (no YAML/shell errors in RUN commands)"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Base image pattern: unityci/editor:ubuntu-${UNITY_VERSION}-${UNITY_PLATFORM}-${GAMECI_VERSION}. Default: 6000.0.36f1, linux-il2cpp, 3. This story depends on scripts existing — create placeholder scripts first if needed, they will be filled in by US-002/003/004.",
       "model": "sonnet"
     },
@@ -38,7 +38,7 @@
         "bash -n scripts/unity/unity-init.sh passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Unity editor binary path varies by GameCI version. Usually at /usr/bin/unity-editor or via PATH. Use $(which unity-editor) or hardcode /opt/unity/Editor/Unity if needed.",
       "model": "sonnet"
     },
@@ -58,7 +58,7 @@
         "bash -n scripts/unity/compile-watcher.sh passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Editor.log location: /root/.config/unity3d/Editor.log or /workspace/Library/Logs/Editor.log. Check both. The watcher should be resilient to the log file not existing yet.",
       "model": "sonnet"
     },
@@ -75,7 +75,7 @@
         "bash -n scripts/unity/unity-compile.sh passes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Keep this script simple — it's the main interface agents use. After unity-editor exits, read the status JSON written by compile-watcher.",
       "model": "haiku"
     },
@@ -98,7 +98,7 @@
         "docker compose config --quiet passes (if docker compose available)"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Port 5432 may be used by DreamCI PostgreSQL — DreamForge MUST use 5433. Add extra_hosts host.docker.internal:host-gateway for container-to-host communication.",
       "model": "sonnet"
     },
@@ -118,7 +118,7 @@
         "File is well-structured markdown with clear sections"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "This is the most important file for agent behavior. Keep it concise and actionable — agents work better with clear, numbered steps.",
       "model": "haiku"
     },
@@ -137,7 +137,7 @@
         "File is well-structured markdown"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "OpenHands knowledge files use trigger keywords to activate relevant context. Format: '# Triggers: keyword1, keyword2'",
       "model": "haiku"
     },
@@ -155,7 +155,7 @@
         "File is well-structured markdown"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Keep focused on headless/batchmode — no references to GUI operations.",
       "model": "haiku"
     },
@@ -175,7 +175,7 @@
         "bash -n scripts/deploy.sh passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "NOTE: Actual deployment will be done with human accompaniment. This story just creates the script. Server is 65.109.80.40, SSH port TBD from audit.",
       "model": "haiku"
     }

@@ -1,0 +1,42 @@
+ARG UNITY_VERSION=6000.0.36f1
+ARG UNITY_PLATFORM=linux-il2cpp
+ARG GAMECI_VERSION=3
+
+FROM unityci/editor:ubuntu-${UNITY_VERSION}-${UNITY_PLATFORM}-${GAMECI_VERSION}
+
+LABEL org.opencontainers.image.title="DreamForge Unity Sandbox"
+LABEL org.opencontainers.image.description="Headless Unity AI development sandbox for OpenHands (batchmode, no GUI)"
+LABEL org.opencontainers.image.source="https://github.com/dreamci/dreamforge"
+
+# Install essential dependencies (NO GUI packages — headless only)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    inotify-tools \
+    git \
+    curl \
+    wget \
+    jq \
+    unzip \
+    python3 \
+    python3-pip \
+    sudo \
+    ca-certificates \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 22 LTS via NodeSource
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Pre-accept Unity Terms of Service via JSON config
+RUN mkdir -p /root/.config/unity3d/Unity \
+    && printf '{"v":1,"accepted":true}\n' > /root/.config/unity3d/Unity/TOS.json
+
+# Copy headless helper scripts
+COPY scripts/unity/unity-init.sh /unity-init.sh
+COPY scripts/unity/compile-watcher.sh /compile-watcher.sh
+COPY scripts/unity/unity-compile.sh /unity-compile.sh
+
+RUN chmod +x /unity-init.sh /compile-watcher.sh /unity-compile.sh
+
+WORKDIR /workspace
