@@ -38,7 +38,7 @@
         "bash -n scripts/unity/unity-init.sh passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Unity editor binary path varies by GameCI version. Usually at /usr/bin/unity-editor or via PATH. Use $(which unity-editor) or hardcode /opt/unity/Editor/Unity if needed.",
       "model": "sonnet"
     },

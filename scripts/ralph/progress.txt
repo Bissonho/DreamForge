@@ -23,3 +23,13 @@ Started: 2026-02-28
   - inotifywait from inotify-tools is used in compile-watcher for file monitoring
   - TOS pre-accept: /root/.config/unity3d/Unity/TOS.json with {"v":1,"accepted":true}
 ---
+
+## 2026-02-28 - US-002
+- Verified scripts/unity/unity-init.sh meets all acceptance criteria (was fully implemented in US-001)
+- All criteria satisfied: git clone with GIT_REPO_URL/GIT_BRANCH, license via .ulf + UNITY_SERIAL, batchmode init, compile-watcher background start, no GUI packages, informative echo messages
+- bash -n scripts/unity/unity-init.sh passes
+- **Learnings for future iterations:**
+  - US-001 agent created fully-implemented scripts, not just placeholders — US-002/003/004 are verification+marking stories
+  - License activation order: .ulf file path first, then UNITY_SERIAL (with UNITY_EMAIL + UNITY_PASSWORD), then TOS-only fallback
+  - Compile-watcher looked up at both /unity-compile-watcher.sh and /compile-watcher.sh for resilience
+---
