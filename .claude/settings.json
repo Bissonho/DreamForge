@@ -1,0 +1,66 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash -n:*)",
+      "Bash(docker:*)",
+      "Bash(docker compose:*)",
+      "Bash(chmod:*)",
+      "Bash(python3 -m py_compile:*)",
+      "Bash(python3 -m pytest:*)",
+      "Bash(npm run:*)",
+      "Bash(shellcheck:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git stash:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(git submodule:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(rsync:*)",
+      "Bash(curl:*)",
+      "Bash(gh:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(jq:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -f:*)",
+      "Bash(git branch -D:*)",
+      "Bash(docker system prune:*)",
+      "Bash(docker volume rm:*)",
+      "Edit(file_path:*.env*)",
+      "Edit(file_path:*.ulf)",
+      "Edit(file_path:*poetry.lock)",
+      "Edit(file_path:*package-lock.json)",
+      "Write(file_path:*.env*)",
+      "Write(file_path:*.ulf)",
+      "Write(file_path:*poetry.lock)",
+      "Write(file_path:*package-lock.json)"
+    ]
+  },
+  "hooks": {
+    "Bash": {
+      "command": ".claude/hooks/validate-command.sh"
+    },
+    "Edit": {
+      "command": ".claude/hooks/block-sensitive-edit.sh"
+    },
+    "Write": {
+      "command": ".claude/hooks/block-sensitive-edit.sh"
+    }
+  }
+}
