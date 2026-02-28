@@ -1,0 +1,33 @@
+# Environment
+.env
+*.env.local
+
+# Unity license
+license.ulf
+*.ulf
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker
+.docker/
+
+# Ralph state
+scripts/ralph/.last-branch
+scripts/ralph/status.txt
+scripts/ralph/archive/
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/

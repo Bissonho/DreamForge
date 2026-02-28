@@ -1,0 +1,183 @@
+{
+  "project": "DreamForge",
+  "branchName": "ralph/dreamforge-mvp",
+  "description": "DreamForge MVP — Headless Unity AI dev environment powered by OpenHands",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create Dockerfile.unity-sandbox (headless Unity image)",
+      "description": "As a developer, I need a custom Docker image based on GameCI that runs Unity in headless batchmode so that sandboxes are lightweight and don't require GUI packages.",
+      "acceptanceCriteria": [
+        "Dockerfile uses unityci/editor as base with ARG for UNITY_VERSION, UNITY_PLATFORM, GAMECI_VERSION",
+        "NO GUI packages installed (no xvfb, vnc, fluxbox, xdotool, supervisor)",
+        "Essential deps: inotify-tools, git, curl, wget, jq, unzip, python3, sudo",
+        "Node.js 22 LTS installed via nodesource",
+        "Unity TOS pre-accepted via JSON config at /root/.config/unity3d/Unity/TOS.json",
+        "COPY and chmod +x for unity-init.sh, compile-watcher.sh, unity-compile.sh from scripts/unity/",
+        "WORKDIR /workspace",
+        "bash -n passes on all shell scripts in the repo",
+        "Dockerfile syntax is valid (no YAML/shell errors in RUN commands)"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Base image pattern: unityci/editor:ubuntu-${UNITY_VERSION}-${UNITY_PLATFORM}-${GAMECI_VERSION}. Default: 6000.0.36f1, linux-il2cpp, 3. This story depends on scripts existing — create placeholder scripts first if needed, they will be filled in by US-002/003/004.",
+      "model": "sonnet"
+    },
+    {
+      "id": "US-002",
+      "title": "Create scripts/unity/unity-init.sh (headless bootstrap)",
+      "description": "As an OpenHands agent, I need a bootstrap script that initializes Unity headless so that the sandbox is ready for C# development.",
+      "acceptanceCriteria": [
+        "Script starts with #!/bin/bash and set -euo pipefail",
+        "Clones git repo if GIT_REPO_URL env var is set (with GIT_BRANCH support)",
+        "Activates Unity license: supports both .ulf file path and UNITY_SERIAL env var",
+        "Runs batchmode init: unity-editor -batchmode -nographics -projectPath /workspace -quit",
+        "Starts compile-watcher.sh in background after init",
+        "NO Xvfb, VNC, display, or GUI-related code anywhere",
+        "Handles errors with informative echo messages",
+        "bash -n scripts/unity/unity-init.sh passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Unity editor binary path varies by GameCI version. Usually at /usr/bin/unity-editor or via PATH. Use $(which unity-editor) or hardcode /opt/unity/Editor/Unity if needed.",
+      "model": "sonnet"
+    },
+    {
+      "id": "US-003",
+      "title": "Create scripts/unity/compile-watcher.sh (compilation monitor)",
+      "description": "As an OpenHands agent, I need a script that monitors Unity compilation status via Editor.log so that I can know when compilation succeeds or fails.",
+      "acceptanceCriteria": [
+        "Uses inotifywait (from inotify-tools) to watch Unity Editor.log for modifications",
+        "Writes JSON status to /tmp/unity-compile-status.json",
+        "JSON format: {\"status\": \"idle|compiling|success|errors\", \"errors\": [], \"timestamp\": \"ISO8601\"}",
+        "Detects compilation start pattern in Unity log",
+        "Detects success pattern (e.g., 'Compilation complete')",
+        "Detects error patterns (e.g., 'error CS') and extracts error messages into errors array",
+        "Runs as background daemon with infinite loop",
+        "Initializes status file with 'idle' state on startup",
+        "bash -n scripts/unity/compile-watcher.sh passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Editor.log location: /root/.config/unity3d/Editor.log or /workspace/Library/Logs/Editor.log. Check both. The watcher should be resilient to the log file not existing yet.",
+      "model": "sonnet"
+    },
+    {
+      "id": "US-004",
+      "title": "Create scripts/unity/unity-compile.sh (compilation helper)",
+      "description": "As an OpenHands agent, I need a simple helper to trigger Unity compilation and see results so that I can verify my C# changes work.",
+      "acceptanceCriteria": [
+        "Runs unity-editor -batchmode -nographics -projectPath /workspace -logFile /tmp/unity-compile.log -quit",
+        "Waits for compilation to finish",
+        "Outputs content of /tmp/unity-compile-status.json",
+        "Returns exit code 0 on success, 1 on failure (checks status field in JSON)",
+        "Script starts with #!/bin/bash and set -euo pipefail",
+        "bash -n scripts/unity/unity-compile.sh passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Keep this script simple — it's the main interface agents use. After unity-editor exits, read the status JSON written by compile-watcher.",
+      "model": "haiku"
+    },
+    {
+      "id": "US-005",
+      "title": "Create docker-compose.yml (OpenHands + PostgreSQL)",
+      "description": "As a developer, I need a Docker Compose configuration that orchestrates OpenHands with an isolated PostgreSQL so that the full stack runs with one command.",
+      "acceptanceCriteria": [
+        "OpenHands service uses image docker.all-hands.dev/all-hands-ai/openhands:latest",
+        "OpenHands exposes port 3000 directly (no reverse proxy)",
+        "OpenHands environment: SANDBOX_BASE_CONTAINER_IMAGE, SANDBOX_TIMEOUT, WORKSPACE_MOUNT_PATH, LLM_API_KEY, LLM_MODEL",
+        "Sandbox resource limits configured: SANDBOX_RUNTIME_CONTAINER_MEMORY=2g, SANDBOX_RUNTIME_CONTAINER_CPUS=0.5",
+        "OpenHands mounts /var/run/docker.sock and workspace volume",
+        "OpenHands deploy resources limit: memory 4g",
+        "PostgreSQL 16-alpine on port 5433 bound to 127.0.0.1 ONLY",
+        "PostgreSQL healthcheck with pg_isready",
+        "OpenHands depends_on postgres with condition: service_healthy",
+        "Named volumes: openhands-state and dreamforge-pgdata",
+        "All env vars use ${VAR:-default} syntax",
+        "docker compose config --quiet passes (if docker compose available)"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Port 5432 may be used by DreamCI PostgreSQL — DreamForge MUST use 5433. Add extra_hosts host.docker.internal:host-gateway for container-to-host communication.",
+      "model": "sonnet"
+    },
+    {
+      "id": "US-006",
+      "title": "Create microagents/repo.md (agent instructions)",
+      "description": "As an OpenHands agent, I need clear instructions about the headless Unity environment so that I know how to initialize, edit, and compile Unity projects.",
+      "acceptanceCriteria": [
+        "Explains Unity runs in HEADLESS mode (batchmode, no GUI)",
+        "Documents first step: run bash /unity-init.sh",
+        "Documents edit-compile cycle: modify .cs files → bash /unity-compile.sh → cat /tmp/unity-compile-status.json",
+        "Documents status JSON states: idle, compiling, success, errors",
+        "Lists rules: C# in /workspace/Assets/Scripts/, never modify Library/ or Temp/",
+        "Mentions Debug.Log() for logging",
+        "States: always compile and verify success before reporting done",
+        "States: there is NO visual editor — work entirely via code",
+        "File is well-structured markdown with clear sections"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "This is the most important file for agent behavior. Keep it concise and actionable — agents work better with clear, numbered steps.",
+      "model": "haiku"
+    },
+    {
+      "id": "US-007",
+      "title": "Create microagents/knowledge/unity-compilation.md",
+      "description": "As an OpenHands agent, I need knowledge about Unity C# compilation errors so that I can diagnose and fix common issues autonomously.",
+      "acceptanceCriteria": [
+        "Has trigger keywords section: compile, error CS, build, compilation",
+        "Documents CS0246 (missing type/namespace) with fix pattern",
+        "Documents CS1061 (missing member) with fix pattern",
+        "Documents CS0103 (undefined name) with fix pattern",
+        "Documents CS0234 (namespace doesn't contain type) with fix pattern",
+        "Explains how to read /tmp/unity-compile-status.json for error details",
+        "Provides general debugging approach for unknown errors",
+        "File is well-structured markdown"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "OpenHands knowledge files use trigger keywords to activate relevant context. Format: '# Triggers: keyword1, keyword2'",
+      "model": "haiku"
+    },
+    {
+      "id": "US-008",
+      "title": "Create microagents/knowledge/unity-editor.md",
+      "description": "As an OpenHands agent, I need knowledge about Unity project structure and CLI commands so that I can navigate and work with Unity projects.",
+      "acceptanceCriteria": [
+        "Has trigger keywords section: editor, unity, scene, project",
+        "Explains Unity project directory structure: Assets/, Library/, ProjectSettings/, Packages/",
+        "Documents which directories are safe to edit (Assets/) vs read-only (Library/)",
+        "Lists Unity batchmode CLI commands with examples (-executeMethod, -buildTarget, -runTests)",
+        "Documents how to run tests via CLI: -runTests -testResults /tmp/test-results.xml",
+        "Explains .meta files and why they matter",
+        "File is well-structured markdown"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "Keep focused on headless/batchmode — no references to GUI operations.",
+      "model": "haiku"
+    },
+    {
+      "id": "US-009",
+      "title": "Create scripts/deploy.sh (deployment helper)",
+      "description": "As a developer, I need a deployment script that syncs files to the server, builds the Unity image, and starts services so that deployment is repeatable.",
+      "acceptanceCriteria": [
+        "Script starts with #!/bin/bash and set -euo pipefail",
+        "Accepts SERVER as first positional arg (required, with usage message if missing)",
+        "Accepts SSH PORT as optional second arg (default: 22)",
+        "Uses rsync to sync files excluding .git, .env, license.ulf",
+        "SSHs to server and runs docker build for unity sandbox image",
+        "SSHs to server and runs docker compose up -d",
+        "Prints final message with URL http://SERVER:3000",
+        "Each step has echo progress message",
+        "bash -n scripts/deploy.sh passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "NOTE: Actual deployment will be done with human accompaniment. This story just creates the script. Server is 65.109.80.40, SSH port TBD from audit.",
+      "model": "haiku"
+    }
+  ]
+}
