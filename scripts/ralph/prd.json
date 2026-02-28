@@ -137,7 +137,7 @@
         "File is well-structured markdown"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "OpenHands knowledge files use trigger keywords to activate relevant context. Format: '# Triggers: keyword1, keyword2'",
       "model": "haiku"
     },

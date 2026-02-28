@@ -82,3 +82,15 @@ Started: 2026-02-28
   - Explicit "What You CAN/MUST NOT Do" sections prevent common mistakes
   - Troubleshooting section helps agents self-diagnose issues
 ---
+
+## 2026-02-28 - US-007
+- Created microagents/knowledge/unity-compilation.md with error diagnosis and fixes
+- All acceptance criteria satisfied: trigger keywords defined, all four error codes (CS0246, CS1061, CS0103, CS0234) documented with causes/fixes/examples, status JSON reading explained, general debugging approach provided, markdown well-structured
+- File includes: Triggers, Overview, Common Error Codes (4 detailed), Status JSON Reading, General Debugging Approach, Fix and Verify Cycle, Tips
+- **Learnings for future iterations:**
+  - Knowledge files use "# Triggers" format for OpenHands context activation
+  - Error documentation should include: cause, fixes (numbered), and code examples (correct vs incorrect)
+  - Common mistake tables help agents quickly identify patterns
+  - Status JSON explanation with example JSON block is essential
+  - Cyclic approach (fix → compile → verify) emphasizes iterative workflow
+---
