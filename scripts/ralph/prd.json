@@ -19,7 +19,7 @@
         "Dockerfile syntax is valid (no YAML/shell errors in RUN commands)"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Base image pattern: unityci/editor:ubuntu-${UNITY_VERSION}-${UNITY_PLATFORM}-${GAMECI_VERSION}. Default: 6000.0.36f1, linux-il2cpp, 3. This story depends on scripts existing — create placeholder scripts first if needed, they will be filled in by US-002/003/004.",
       "model": "sonnet"
     },

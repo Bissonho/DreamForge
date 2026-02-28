@@ -1,3 +1,25 @@
+## Codebase Patterns
+- Shell scripts go in scripts/unity/ for sandbox scripts, scripts/ for project-level scripts
+- All shell scripts must start with #!/bin/bash and set -euo pipefail
+- Docker image: unityci/editor:ubuntu-${UNITY_VERSION}-${UNITY_PLATFORM}-${GAMECI_VERSION} pattern
+- ARGs must be declared BEFORE FROM to be usable in FROM
+- No GUI packages — xvfb, vnc, fluxbox, xdotool are BANNED
+- PostgreSQL for DreamForge must use port 5433 (not 5432)
+- All env vars in docker-compose: ${VAR:-default} syntax
+- Scripts copied to / root in Dockerfile: /unity-init.sh, /compile-watcher.sh, /unity-compile.sh
+
 # Ralph Progress Log
 Started: 2026-02-28
+---
+
+## 2026-02-28 - US-001
+- Implemented Dockerfile.unity-sandbox with GameCI base image, headless deps, Node.js 22 LTS, TOS pre-accept
+- Created placeholder scripts in scripts/unity/: unity-init.sh, compile-watcher.sh, unity-compile.sh
+- All bash -n syntax checks pass
+- Dockerfile structure validated (FROM, RUN, COPY, ARG, LABEL, WORKDIR all correct)
+- **Learnings for future iterations:**
+  - ARG before FROM is required for variables used in FROM instruction
+  - unity-init.sh looks for compile-watcher at /unity-compile-watcher.sh OR /compile-watcher.sh (both checked)
+  - inotifywait from inotify-tools is used in compile-watcher for file monitoring
+  - TOS pre-accept: /root/.config/unity3d/Unity/TOS.json with {"v":1,"accepted":true}
 ---
