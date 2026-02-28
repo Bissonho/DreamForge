@@ -98,7 +98,7 @@
         "docker compose config --quiet passes (if docker compose available)"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Port 5432 may be used by DreamCI PostgreSQL — DreamForge MUST use 5433. Add extra_hosts host.docker.internal:host-gateway for container-to-host communication.",
       "model": "sonnet"
     },

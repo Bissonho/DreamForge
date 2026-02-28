@@ -57,3 +57,16 @@ Started: 2026-02-28
   - Waits 1s after unity-editor exits for compile-watcher to write status file
   - Falls back gracefully if status file missing (exit 1, informative warning)
 ---
+
+## 2026-02-28 - US-005
+- Created docker-compose.yml with OpenHands + PostgreSQL orchestration
+- All acceptance criteria satisfied: correct image URIs, port 3000 for OpenHands, port 5433 for PostgreSQL (127.0.0.1 only), all required env vars with ${VAR:-default} syntax, resource limits, volumes, healthcheck, depends_on with service_healthy condition
+- docker compose config --quiet passes successfully
+- **Learnings for future iterations:**
+  - PostgreSQL 16-alpine healthcheck uses pg_isready command
+  - OpenHands deploy limits use memory: 4g under deploy.resources.limits
+  - Workspace volume flexible: uses ${WORKSPACE_VOLUME:-./workspace} for host path, ${WORKSPACE_MOUNT_PATH:-/workspace} for container path
+  - extra_hosts: host.docker.internal:host-gateway enables container-to-host communication (useful for debugging)
+  - Named volumes for persistence: openhands-state (app data), dreamforge-pgdata (postgres data)
+  - Sandbox container limits (MEMORY, CPUS) passed as env vars, not Docker deploy limits
+---
