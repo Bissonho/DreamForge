@@ -155,7 +155,7 @@
         "File is well-structured markdown"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Keep focused on headless/batchmode — no references to GUI operations.",
       "model": "haiku"
     },

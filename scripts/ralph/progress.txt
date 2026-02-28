@@ -94,3 +94,16 @@ Started: 2026-02-28
   - Status JSON explanation with example JSON block is essential
   - Cyclic approach (fix → compile → verify) emphasizes iterative workflow
 ---
+
+## 2026-02-28 - US-008
+- Created microagents/knowledge/unity-editor.md with project structure and CLI commands
+- All acceptance criteria satisfied: trigger keywords defined, project directory structure explained with tree diagram, safe/read-only directories documented in table, batchmode CLI commands with examples (execute, build target, tests), test workflow documented, .meta files explained with examples, markdown well-structured
+- File includes: Triggers, Overview, Project Directory Structure, Meta Files, Batchmode CLI Commands, Useful Patterns, Important Constraints, Common Workflows, Troubleshooting, Summary
+- **Learnings for future iterations:**
+  - Directory trees (```tree``` format) help agents understand structure quickly
+  - Tables (Safe vs Read-Only) provide quick reference
+  - CLI commands should have full flag examples (not abbreviated)
+  - Code examples for both C# (Editor scripts, tests) and CLI usage
+  - Constraints section explicitly lists what's unavailable in headless mode vs what works
+  - Common workflows show practical patterns for scene setup, resource loading, scene management
+---
