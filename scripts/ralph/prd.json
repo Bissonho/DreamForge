@@ -75,7 +75,7 @@
         "bash -n scripts/unity/unity-compile.sh passes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Keep this script simple — it's the main interface agents use. After unity-editor exits, read the status JSON written by compile-watcher.",
       "model": "haiku"
     },

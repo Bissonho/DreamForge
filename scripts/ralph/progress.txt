@@ -45,3 +45,15 @@ Started: 2026-02-28
   - inotifywait -q -e modify is used (quiet mode, modify events only)
   - Script is resilient: if inotifywait fails or log file disappears, it sleeps 2s and retries
 ---
+
+## 2026-02-28 - US-004
+- Verified scripts/unity/unity-compile.sh meets all acceptance criteria (was fully implemented in US-001)
+- All criteria satisfied: unity-editor batchmode command with correct flags, waits for compilation, outputs status JSON, returns 0 on success/idle, returns 1 on failure, proper shebang and error handling
+- bash -n scripts/unity/unity-compile.sh passes
+- **Learnings for future iterations:**
+  - US-001 created fully-implemented unity-compile.sh — US-004 is a verification story
+  - Script uses grep -o '"status":"[^"]*"' | cut -d'"' -f4 to extract status value from JSON
+  - Treats both "success" and "idle" as successful compilations (handles edge cases)
+  - Waits 1s after unity-editor exits for compile-watcher to write status file
+  - Falls back gracefully if status file missing (exit 1, informative warning)
+---
