@@ -175,7 +175,7 @@
         "bash -n scripts/deploy.sh passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "NOTE: Actual deployment will be done with human accompaniment. This story just creates the script. Server is 65.109.80.40, SSH port TBD from audit.",
       "model": "haiku"
     }

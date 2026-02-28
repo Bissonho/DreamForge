@@ -107,3 +107,17 @@ Started: 2026-02-28
   - Constraints section explicitly lists what's unavailable in headless mode vs what works
   - Common workflows show practical patterns for scene setup, resource loading, scene management
 ---
+
+## 2026-02-28 - US-009
+- Created scripts/deploy.sh with 4-step deployment automation (sync, build, compose, summary)
+- All acceptance criteria satisfied: correct shebang and set -euo pipefail, SERVER positional arg required with usage message, SSH PORT optional arg with default 22, rsync with exclusions (.git, .env, license.ulf, .claude, node_modules, .venv), docker build for Dockerfile.unity-sandbox on server, docker compose up -d on server, final message with URL http://SERVER:3000, echo progress at each step, bash -n passes
+- Script uses here-documents (<<<'EOF') for multi-line SSH commands
+- **Learnings for future iterations:**
+  - Deployment scripts should be idempotent where possible (rsync --delete, compose up -d idempotent)
+  - Each step should have clear progress messages with [deploy] prefix
+  - Usage message templates help users understand argument format
+  - Here-documents keep SSH commands readable and organized
+  - Final summary box (with ━━ borders) provides clear feedback
+  - Exclude patterns should include .claude, node_modules, .venv for safety
+  - Exit code handling (exit 1 on error) enables proper pipeline error detection
+---
