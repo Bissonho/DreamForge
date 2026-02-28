@@ -42,20 +42,33 @@ echo "[deploy] ✓ Files synced"
 echo ""
 
 # Step 2: Build Unity sandbox image
-echo "[deploy] Step 2/4: Building Unity sandbox Docker image on server..."
+echo "[deploy] Step 2/5: Building Unity sandbox Docker image on server..."
 ssh -p "$SSH_PORT" "root@$SERVER" <<'EOF'
     cd /opt/dreamforge
     docker build -f Dockerfile.unity-sandbox -t dreamforge-unity-sandbox:latest . || {
-        echo "[deploy] ERROR: Docker build failed"
+        echo "[deploy] ERROR: Unity sandbox Docker build failed"
         exit 1
     }
-    echo "[deploy] ✓ Unity image built"
+    echo "[deploy] ✓ Unity sandbox image built"
 EOF
-echo "[deploy] ✓ Docker image build complete"
+echo "[deploy] ✓ Unity sandbox image build complete"
 echo ""
 
-# Step 3: Start services with docker-compose
-echo "[deploy] Step 3/4: Starting services with docker-compose..."
+# Step 3: Build OpenHands (local fork)
+echo "[deploy] Step 3/5: Building OpenHands from local fork on server..."
+ssh -p "$SSH_PORT" "root@$SERVER" <<'EOF'
+    cd /opt/dreamforge
+    docker compose build openhands || {
+        echo "[deploy] ERROR: OpenHands build failed"
+        exit 1
+    }
+    echo "[deploy] ✓ OpenHands image built"
+EOF
+echo "[deploy] ✓ OpenHands build complete"
+echo ""
+
+# Step 4: Start services with docker-compose
+echo "[deploy] Step 4/5: Starting services with docker-compose..."
 ssh -p "$SSH_PORT" "root@$SERVER" <<'EOF'
     cd /opt/dreamforge
     docker compose up -d || {
@@ -67,8 +80,8 @@ EOF
 echo "[deploy] ✓ Docker compose started"
 echo ""
 
-# Step 4: Summary
-echo "[deploy] Step 4/4: Deployment complete!"
+# Step 5: Summary
+echo "[deploy] Step 5/5: Deployment complete!"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
