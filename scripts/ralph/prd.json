@@ -58,7 +58,7 @@
         "bash -n scripts/unity/compile-watcher.sh passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Editor.log location: /root/.config/unity3d/Editor.log or /workspace/Library/Logs/Editor.log. Check both. The watcher should be resilient to the log file not existing yet.",
       "model": "sonnet"
     },

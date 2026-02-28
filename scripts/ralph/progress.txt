@@ -33,3 +33,15 @@ Started: 2026-02-28
   - License activation order: .ulf file path first, then UNITY_SERIAL (with UNITY_EMAIL + UNITY_PASSWORD), then TOS-only fallback
   - Compile-watcher looked up at both /unity-compile-watcher.sh and /compile-watcher.sh for resilience
 ---
+
+## 2026-02-28 - US-003
+- Verified scripts/unity/compile-watcher.sh meets all acceptance criteria (was fully implemented in US-001)
+- All criteria satisfied: inotifywait-based monitoring, JSON status file, idle/compiling/success/errors states, ISO8601 timestamp, error CS extraction, infinite daemon loop, resilient to missing log file
+- bash -n scripts/unity/compile-watcher.sh passes
+- **Learnings for future iterations:**
+  - US-001 created fully-implemented compile-watcher.sh — US-003 is a verification story
+  - compile-watcher checks both /root/.config/unity3d/Editor.log and /workspace/Library/Logs/Editor.log
+  - extract_errors uses grep -o 'error CS[^)]*' to capture error codes and messages
+  - inotifywait -q -e modify is used (quiet mode, modify events only)
+  - Script is resilient: if inotifywait fails or log file disappears, it sleeps 2s and retries
+---
