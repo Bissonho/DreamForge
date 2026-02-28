@@ -118,7 +118,7 @@
         "File is well-structured markdown with clear sections"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "This is the most important file for agent behavior. Keep it concise and actionable — agents work better with clear, numbered steps.",
       "model": "haiku"
     },

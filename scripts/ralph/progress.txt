@@ -70,3 +70,15 @@ Started: 2026-02-28
   - Named volumes for persistence: openhands-state (app data), dreamforge-pgdata (postgres data)
   - Sandbox container limits (MEMORY, CPUS) passed as env vars, not Docker deploy limits
 ---
+
+## 2026-02-28 - US-006
+- Created microagents/repo.md with comprehensive agent instructions for headless Unity development
+- All acceptance criteria satisfied: headless mode explained, bootstrap step documented, edit-compile-verify cycle detailed, status JSON states documented, project rules listed, Debug.Log() mentioned, verification workflow emphasized, no GUI emphasized, markdown well-structured with sections, tables, examples
+- File includes: Overview, Quick Start, Status JSON Reference, Rules and Constraints, Logging, Verification Workflow, Project Structure, Troubleshooting, Summary
+- **Learnings for future iterations:**
+  - Agent instruction files should use numbered/sequential workflows for clarity
+  - Tables (markdown) work well for reference material (status states, rules)
+  - Code examples with ```bash``` and ```csharp``` blocks improve readability
+  - Explicit "What You CAN/MUST NOT Do" sections prevent common mistakes
+  - Troubleshooting section helps agents self-diagnose issues
+---
